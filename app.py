@@ -55,7 +55,17 @@ def branch_dashboard():
     if session.get("role") != "Branch":
         return redirect(url_for("index"))
     return render_template("branch_dashboard.html")
+from flask import request
 
+@app.route("/set-branch", methods=["POST"])
+def set_branch():
+    if session.get("role") != "Branch":
+        return redirect(url_for("index"))
+
+    branch_code = request.form.get("branch_code")
+    session["branch_code"] = branch_code
+
+    return redirect(url_for("branch_dashboard"))
 
 # -----------------------------
 # ADMIN FLOW
