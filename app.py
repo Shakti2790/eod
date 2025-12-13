@@ -23,17 +23,36 @@ CENTRAL_ADMINS = [
     "sktpathak@gmail.com"
 ]
 
-@app.route("/")
+@app.route("/login")
+def login():
+    # TEMP: change role here to test flows
+    session["user"] = "test@demo.com"
+
+    # change this value to test:
+    # "CentralAdmin" or "Branch"
+    session["role"] = "Branch"
+
+    if session["role"] == "CentralAdmin":
+        return redirect(url_for("dashboard"))
+    else:
+        return redirect(url_for("select_branch"))app.route("/")
 def index():
     if "user" in session:
         return redirect(url_for("dashboard"))
-    return render_template("login.html")
 
 @app.route("/login")
 def login():
+    # TEMP: change role here to test flows
     session["user"] = "test@demo.com"
-    session["role"] = "CentralAdmin"
-    return redirect(url_for("dashboard"))
+
+    # change this value to test:
+    # "CentralAdmin" or "Branch"
+    session["role"] = "Branch"
+
+    if session["role"] == "CentralAdmin":
+        return redirect(url_for("dashboard"))
+    else:
+        return redirect(url_for("select_branch"))
 
 @app.route("/authorize")
 def authorize():
