@@ -1,11 +1,34 @@
-from flask import Flask, render_template, redirect, url_for, session
+from flask import Flask, render_template, redirect, url_for, session, request
 import os
+import requests
 
 app = Flask(__name__)
 app.secret_key = "change-this-secret-key-123"
 
 # -----------------------------
-# HOME / LOGIN PAGE
+# GOOGLE SHEET CONFIG (PUBLIC READ)
+# -----------------------------
+SHEET_ID = "PASTE_YOUR_SHEET_ID_HERE"
+SHEET_NAME = "Branch_Master"
+
+def get_branches():
+    url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}"
+    response = requests.get(url)
+    lines = response.text.splitlines()
+
+    branches = []
+    for line in lines[1:]:  # skip header
+        parts = line.split(",")
+        if len(parts) >= 2:
+            branches.append({
+                "code": parts[0].strip(),
+                "name": parts[1].strip()
+            })
+    return branches
+
+
+# -----------------------------
+# HOME / LOGIN
 # -----------------------------
 @app.route("/")
 def index():
@@ -13,17 +36,15 @@ def index():
 
 
 # -----------------------------
-# TEMPORARY LOGIN (NO OAUTH)
+# TEMP LOGIN (NO OAUTH YET)
 # -----------------------------
 @app.route("/login")
 def login():
-    # TEMPORARY USER
     session.clear()
     session["user"] = "test@demo.com"
 
-    # CHANGE ROLE HERE FOR TESTING:
-    # "CentralAdmin" or "Branch"
-    session["role"] = "Branch"
+    # CHANGE THIS ONLY WHEN TESTING
+    session["role"] = "Branch"   # or "CentralAdmin"
 
     if session["role"] == "CentralAdmin":
         return redirect(url_for("admin_dashboard"))
@@ -47,33 +68,38 @@ def logout():
 def select_branch():
     if session.get("role") != "Branch":
         return redirect(url_for("index"))
-    return render_template("branch_select.html")
 
+    branches = get_branches()
+    return render_template("branch_select.html", branches=branches)
 
-@app.route("/branch-dashboard")
-def branch_dashboard():
-    if session.get("role") != "Branch":
-        return redirect(url_for("index"))
-    return render_template("branch_dashboard.html")
-from flask import request
 
 @app.route("/set-branch", methods=["POST"])
 def set_branch():
     if session.get("role") != "Branch":
         return redirect(url_for("index"))
 
-    branch_code = request.form.get("branch_code")
-    session["branch_code"] = branch_code
+    session["branch_code"] = request.form.get("branch_code")
+    session["branch_name"] = request.form.get("branch_name")
 
     return redirect(url_for("branch_dashboard"))
 
+
+@app.route("/branch-dashboard")
+def branch_dashboard():
+    if session.get("role") != "Branch":
+        return redirect(url_for("index"))
+
+    return render_template("branch_dashboard.html")
+
+
 # -----------------------------
-# ADMIN FLOW
+# ADMIN FLOW (PLACEHOLDER)
 # -----------------------------
 @app.route("/admin-dashboard")
 def admin_dashboard():
     if session.get("role") != "CentralAdmin":
         return redirect(url_for("index"))
+
     return render_template("admin_dashboard.html")
 
 
