@@ -8,15 +8,15 @@ app = Flask(__name__)
 app.secret_key = "change-this-secret-key-123"
 
 # =================================================
-# GOOGLE SHEET CONFIG (PUBLIC – READ ONLY)
+# GOOGLE SHEET CONFIG (PUBLIC READ-ONLY)
 # =================================================
-SHEET_ID = "PASTE_YOUR_SHEET_ID_HERE"   # <-- yahan apna Sheet ID daalo
+SHEET_ID = "1nLKZAkLZhitxAos28ST6aa6bxXKO-tfoVKxZegkifhY"
 SHEET_NAME = "Branch_Master"
 
 
 def get_branches():
     """
-    Reads branch master from Google Sheets (CSV export)
+    Read branch master from Google Sheets (CSV export)
     """
     url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&sheet={SHEET_NAME}"
     response = requests.get(url)
@@ -54,7 +54,7 @@ def login():
     session.clear()
     session["user"] = "test@demo.com"
 
-    # CHANGE ONLY THIS LINE FOR TESTING
+    # CHANGE ONLY THIS VALUE WHEN TESTING
     session["role"] = "Branch"      # "Branch" or "CentralAdmin"
 
     if session["role"] == "CentralAdmin":
@@ -104,7 +104,7 @@ def branch_dashboard():
 
 
 # =================================================
-# ADMIN FLOW (PLACEHOLDER FOR NOW)
+# ADMIN FLOW (PLACEHOLDER)
 # =================================================
 @app.route("/admin-dashboard")
 def admin_dashboard():
