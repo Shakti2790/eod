@@ -9,14 +9,19 @@
 <h3>Select Your Branch</h3>
 
 <form method="post" action="/set-branch">
+
     <label>Branch Code & Name</label><br><br>
 
-    <select name="branch_code" required style="padding:8px; width:100%;">
+    <select name="branch_code" id="branch_code" required style="padding:10px; width:100%;">
         <option value="">-- Select Branch --</option>
-        <option value="3862">3862 – VIRAJKHAND</option>
-        <option value="1773">1773 – VIBHUTI KHAND</option>
-        <option value="0207">0207 – LUCKNOW</option>
+        {% for b in branches %}
+            <option value="{{ b.code }}" data-name="{{ b.name }}">
+                {{ b.code }} – {{ b.name }}
+            </option>
+        {% endfor %}
     </select>
+
+    <input type="hidden" name="branch_name" id="branch_name">
 
     <br><br>
     <button type="submit" style="padding:10px 20px;">
@@ -24,5 +29,12 @@
     </button>
 </form>
 
+<script>
+document.getElementById("branch_code").addEventListener("change", function () {
+    var selected = this.options[this.selectedIndex];
+    document.getElementById("branch_name").value = selected.getAttribute("data-name");
+});
+</script>
+
 </body>
-</html>
+    </html>
