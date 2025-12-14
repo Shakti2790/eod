@@ -1,53 +1,46 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Branch Dashboard</title>
+    <title>Central Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-<body style="font-family:Arial; padding:20px; background:#f7f7f7;">
+<body style="font-family:Arial; padding:20px; background:#f4f4f4;">
 
 <div style="background:#fff; padding:15px; border-radius:8px;">
 
-<h3>Branch Dashboard</h3>
-
-<p>
-<b>Branch:</b> {{ branch_code }} – {{ branch_name }}
-</p>
-
+<h3>Central Admin Dashboard</h3>
 <hr>
 
-<h4 style="color:#b30000;">
-Permission Required Before Proceeding for EOD
-</h4>
+<h4>Active Permissions</h4>
 
 {% if permissions %}
+<table border="1" cellpadding="8" cellspacing="0" width="100%" style="border-collapse:collapse;">
+    <tr style="background:#eee;">
+        <th>Branch</th>
+        <th>Department</th>
+        <th>Instruction</th>
+        <th>Status</th>
+        <th>Created At</th>
+    </tr>
+
     {% for p in permissions %}
-        <div style="border:1px solid #ddd; padding:10px; margin-bottom:15px; border-radius:6px;">
-            <p><b>Department:</b> {{ p.department }}</p>
-            <p><b>Instruction:</b> {{ p.reason }}</p>
-            <p><b>Status:</b> {{ p.status }}</p>
-
-            <form method="post" action="/submit-reply">
-                <input type="hidden" name="permission_id" value="{{ p.permission_id }}">
-                <input type="hidden" name="branch_code" value="{{ branch_code }}">
-
-                <textarea name="reply_text" required
-                    placeholder="Enter your reply / compliance"
-                    style="width:100%; height:60px;"></textarea><br><br>
-
-                <button type="submit">Submit Reply</button>
-            </form>
-        </div>
+    <tr>
+        <td>{{ p.branch_code }} – {{ p.branch_name }}</td>
+        <td>{{ p.department }}</td>
+        <td>{{ p.reason }}</td>
+        <td>{{ p.status }}</td>
+        <td>{{ p.created_at }}</td>
+    </tr>
     {% endfor %}
+</table>
 {% else %}
-    <p>No active permissions.</p>
+<p>No active permissions.</p>
 {% endif %}
 
 <hr>
-
 <a href="/logout">Logout</a>
 
 </div>
 </body>
-    </html>
+</html>
