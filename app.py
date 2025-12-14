@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.secret_key = "change-this-secret-key"
 
 # =================================================
-# GOOGLE SHEET FILE IDs (FINAL)
+# GOOGLE SHEET FILE IDs
 # =================================================
 
 BRANCH_MASTER_ID = "17Y9f2dFSZXGZsVmVP9wvzla6haom6NntB27dkHUfSUM"
@@ -18,7 +18,7 @@ REPLIES_ID       = "183oVHlHXa_YEFoWdeVGHnzVZzm2zhGRSc_XOmhsM7gA"
 USERS_ID         = "1gsWjkRXCxmM8lIBxK2VCpH5Lbwdl46Y6hVEBd4BB-vs"
 
 # =================================================
-# GENERIC CSV READER
+# GENERIC CSV READER (READ-ONLY)
 # =================================================
 
 def read_csv(sheet_id):
@@ -26,55 +26,77 @@ def read_csv(sheet_id):
     res = requests.get(url)
     if res.status_code != 200:
         return []
-    data = res.content.decode("utf-8")
-    return list(csv.DictReader(io.StringIO(data)))
+    return list(csv.DictReader(io.StringIO(res.content.decode("utf-8"))))
 
 # =================================================
-# DATA ACCESS FUNCTIONS
+# DATA FUNCTIONS
 # =================================================
 
 def get_branches():
     rows = read_csv(BRANCH_MASTER_ID)
-    branches = []
-    for r in rows:
-        code = str(r.get("Branch_Code", "")).strip()
-        name = str(r.get("Branch_Name", "")).strip()
-        if code and name:
-            branches.append({"code": code, "name": name})
-    return branches
+    return [
+        {
+            "code": str(r.get("Branch_Code", "")).strip(),
+            "name": str(r.get("Branch_Name", "")).strip()
+        }
+        for r in rows
+        if r.get("Branch_Code") and r.get("Branch_Name")
+    ]
 
 
 def get_branch_permissions(branch_code):
     rows = read_csv(PERMISSIONS_ID)
-    result = []
     branch_code = str(branch_code).strip()
 
+    permissions = []
     for r in rows:
         if (
             str(r.get("Branch_Code", "")).strip() == branch_code
             and str(r.get("Status", "")).strip() == "Active"
         ):
-            result.append({
+            permissions.append({
                 "permission_id": r.get("Permission_ID"),
                 "department": r.get("Department"),
                 "reason": r.get("Reason"),
                 "status": r.get("Status")
             })
-    return result
+    return permissions
 
 
 def get_user(email):
     rows = read_csv(USERS_ID)
     for r in rows:
-        if str(r.get("Email", "")).strip().lower() == email.lower():
+        if str(r.get("Email", "")).lower() == email.lower():
             return r
     return None
 
 
+# =================================================
+# REPLY SAVE (VIA GOOGLE FORM – PLACEHOLDER)
+# =================================================
+
 def save_branch_reply(permission_id, branch_code, reply_text):
-    # NOTE: Google Sheets append requires API.
-    # For now this function is a placeholder for next step.
-    pass
+    """
+    NOTE:
+    Google Sheets does NOT allow write via CSV.
+    This function will work AFTER we connect a Google Form.
+
+    Replace:
+    - YOUR_FORM_ID
+    - entry.xxxxxx values
+    """
+
+    form_url = "https://docs.google.com/forms/d/e/YOUR_FORM_ID/formResponse"
+
+    payload = {
+        "entry.111111": permission_id,
+        "entry.222222": branch_code,
+        "entry.333333": reply_text,
+        "entry.444444": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+
+    requests.post(form_url, data=payload)
+
 
 # =================================================
 # ROUTES
@@ -87,10 +109,13 @@ def index():
 
 @app.route("/login")
 def login():
-    # TEMP LOGIN (Google OAuth later)
+    """
+    TEMP LOGIN
+    (Google login will replace this later)
+    """
     session.clear()
 
-    email = "branch.user@gmail.com"  # simulate login
+    email = "branch.user@gmail.com"  # simulated login
     user = get_user(email)
 
     if not user or user.get("Active") != "Yes":
@@ -99,7 +124,7 @@ def login():
     session["email"] = email
     session["role"] = user.get("Role")
 
-    if user.get("Role") == "Branch":
+    if session["role"] == "Branch":
         return redirect(url_for("select_branch"))
     else:
         return redirect(url_for("admin_dashboard"))
@@ -151,6 +176,20 @@ def branch_dashboard():
         permissions=permissions
     )
 
+
+@app.route("/submit-reply", methods=["POST"])
+def submit_reply():
+    if session.get("role") != "Branch":
+        return redirect(url_for("index"))
+
+    permission_id = request.form.get("permission_id")
+    branch_code = request.form.get("branch_code")
+    reply_text = request.form.get("reply_text")
+
+    save_branch_reply(permission_id, branch_code, reply_text)
+
+    return redirect(url_for("branch_dashboard"))
+
 # -----------------------------
 # ADMIN FLOW (PLACEHOLDER)
 # -----------------------------
@@ -162,12 +201,12 @@ def admin_dashboard():
 
     return """
     <h3>Admin Dashboard</h3>
-    <p>Permission creation & monitoring coming next.</p>
+    <p>Admin features coming next.</p>
     <a href="/logout">Logout</a>
     """
 
 # =================================================
-# APP START
+# APP START (RENDER SAFE)
 # =================================================
 
 if __name__ == "__main__":
