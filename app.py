@@ -1,3 +1,4 @@
+PERMISSION_SHEET = "Permissions"
 from flask import Flask, render_template, redirect, url_for, session, request
 import os
 import requests
