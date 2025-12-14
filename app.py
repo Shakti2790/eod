@@ -30,10 +30,13 @@ def get_branches():
 
     branches = []
     for row in reader:
-        if row.get("Branch_Code") and row.get("Branch_Name"):
+        code = str(row.get("Branch_Code", "")).strip()
+        name = str(row.get("Branch_Name", "")).strip()
+
+        if code and name:
             branches.append({
-                "code": row["Branch_Code"].strip(),
-                "name": row["Branch_Name"].strip()
+                "code": code,
+                "name": name
             })
 
     return branches
@@ -50,15 +53,17 @@ def get_branch_permissions(branch_code):
     reader = csv.DictReader(io.StringIO(decoded))
 
     permissions = []
+    branch_code = str(branch_code).strip()
+
     for row in reader:
-        if (
-            row.get("Branch_Code") == branch_code
-            and row.get("Status") == "Active"
-        ):
+        sheet_branch = str(row.get("Branch_Code", "")).strip()
+        status = str(row.get("Status", "")).strip()
+
+        if sheet_branch == branch_code and status == "Active":
             permissions.append({
-                "department": row.get("Department"),
-                "reason": row.get("Reason"),
-                "status": row.get("Status")
+                "department": str(row.get("Department", "")).strip(),
+                "reason": str(row.get("Reason", "")).strip(),
+                "status": status
             })
 
     return permissions
@@ -110,8 +115,8 @@ def set_branch():
     if session.get("role") != "Branch":
         return redirect(url_for("index"))
 
-    session["branch_code"] = request.form.get("branch_code")
-    session["branch_name"] = request.form.get("branch_name")
+    session["branch_code"] = str(request.form.get("branch_code")).strip()
+    session["branch_name"] = str(request.form.get("branch_name")).strip()
 
     return redirect(url_for("branch_dashboard"))
 
@@ -121,8 +126,8 @@ def branch_dashboard():
     if session.get("role") != "Branch":
         return redirect(url_for("index"))
 
-    branch_code = session.get("branch_code")
-    branch_name = session.get("branch_name")
+    branch_code = str(session.get("branch_code", "")).strip()
+    branch_name = str(session.get("branch_name", "")).strip()
 
     permissions = get_branch_permissions(branch_code)
 
@@ -145,7 +150,7 @@ def admin_dashboard():
 
     return """
     <h3>Admin Dashboard</h3>
-    <p>Permission module coming next</p>
+    <p>Permission module next step</p>
     <a href="/logout">Logout</a>
     """
 
