@@ -12,7 +12,7 @@ app.secret_key = "change-this-secret-key-123"
 # =================================================
 SHEET_ID = "1nLKZAkLZhitxAos28ST6aa6bxXKO-tfoVKxZegkifhY"
 BRANCH_SHEET = "Branch_Master"
-PERMISSION_SHEET = "Permissions"
+PERMISSION_SHEET = "Permissions$"
 
 # =================================================
 # HELPER FUNCTIONS
