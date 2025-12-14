@@ -1,16 +1,59 @@
 <!DOCTYPE html>
 <html>
-<body style="font-family:Arial; padding:20px;">
+<head>
+    <title>Branch Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
 
-<h3>Branch Dashboard</h3>
+<body style="font-family: Arial, sans-serif; padding:20px; background:#f7f7f7;">
 
-<p><b>Branch Code:</b> {{ session.branch_code }}</p>
+<div style="background:#ffffff; padding:15px; border-radius:8px; box-shadow:0 0 5px rgba(0,0,0,0.1);">
 
-<p style="margin-top:20px;">
-Permission Required Before Proceeding for EOD
-</p>
+    <h3 style="margin-top:0;">Branch Dashboard</h3>
 
-<a href="/logout">Logout</a>
+    <p style="margin-bottom:10px;">
+        <b>Branch:</b>
+        {{ branch_code }}
+        {% if branch_name %}
+            – {{ branch_name }}
+        {% endif %}
+    </p>
+
+    <hr>
+
+    <h4 style="color:#b30000;">
+        Permission Required Before Proceeding for EOD
+    </h4>
+
+    {% if permissions and permissions|length > 0 %}
+
+        {% for p in permissions %}
+            <div style="border:1px solid #ddd; padding:10px; border-radius:6px; margin-bottom:10px; background:#fff8f8;">
+                <p style="margin:0 0 5px 0;">
+                    <b>Department:</b> {{ p.department }}
+                </p>
+                <p style="margin:0 0 5px 0;">
+                    <b>Instruction:</b> {{ p.reason }}
+                </p>
+                <p style="margin:0;">
+                    <b>Status:</b> {{ p.status }}
+                </p>
+            </div>
+        {% endfor %}
+
+    {% else %}
+        <p style="color:#555;">
+            No active permissions at present.
+        </p>
+    {% endif %}
+
+    <hr>
+
+    <a href="/logout" style="color:#0066cc; text-decoration:none;">
+        Logout
+    </a>
+
+</div>
 
 </body>
-</html>
+  </html>
