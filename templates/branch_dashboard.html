@@ -5,55 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
-<body style="font-family: Arial, sans-serif; padding:20px; background:#f7f7f7;">
+<body style="font-family:Arial; padding:20px; background:#f7f7f7;">
 
-<div style="background:#ffffff; padding:15px; border-radius:8px; box-shadow:0 0 5px rgba(0,0,0,0.1);">
+<div style="background:#fff; padding:15px; border-radius:8px;">
 
-    <h3 style="margin-top:0;">Branch Dashboard</h3>
+<h3>Branch Dashboard</h3>
 
-    <p style="margin-bottom:10px;">
-        <b>Branch:</b>
-        {{ branch_code }}
-        {% if branch_name %}
-            – {{ branch_name }}
-        {% endif %}
-    </p>
+<p>
+<b>Branch:</b> {{ branch_code }} – {{ branch_name }}
+</p>
 
-    <hr>
+<hr>
 
-    <h4 style="color:#b30000;">
-        Permission Required Before Proceeding for EOD
-    </h4>
+<h4 style="color:#b30000;">
+Permission Required Before Proceeding for EOD
+</h4>
 
-    {% if permissions and permissions|length > 0 %}
+{% if permissions %}
+    {% for p in permissions %}
+        <div style="border:1px solid #ddd; padding:10px; margin-bottom:15px; border-radius:6px;">
+            <p><b>Department:</b> {{ p.department }}</p>
+            <p><b>Instruction:</b> {{ p.reason }}</p>
+            <p><b>Status:</b> {{ p.status }}</p>
 
-        {% for p in permissions %}
-            <div style="border:1px solid #ddd; padding:10px; border-radius:6px; margin-bottom:10px; background:#fff8f8;">
-                <p style="margin:0 0 5px 0;">
-                    <b>Department:</b> {{ p.department }}
-                </p>
-                <p style="margin:0 0 5px 0;">
-                    <b>Instruction:</b> {{ p.reason }}
-                </p>
-                <p style="margin:0;">
-                    <b>Status:</b> {{ p.status }}
-                </p>
-            </div>
-        {% endfor %}
+            <form method="post" action="/submit-reply">
+                <input type="hidden" name="permission_id" value="{{ p.permission_id }}">
+                <input type="hidden" name="branch_code" value="{{ branch_code }}">
 
-    {% else %}
-        <p style="color:#555;">
-            No active permissions at present.
-        </p>
-    {% endif %}
+                <textarea name="reply_text" required
+                    placeholder="Enter your reply / compliance"
+                    style="width:100%; height:60px;"></textarea><br><br>
 
-    <hr>
+                <button type="submit">Submit Reply</button>
+            </form>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No active permissions.</p>
+{% endif %}
 
-    <a href="/logout" style="color:#0066cc; text-decoration:none;">
-        Logout
-    </a>
+<hr>
+
+<a href="/logout">Logout</a>
 
 </div>
-
 </body>
-  </html>
+    </html>
